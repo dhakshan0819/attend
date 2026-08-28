@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System</title>
+    <link rel="stylesheet" href="/static/fonts/inter.css">
+    <link rel="stylesheet" href="/static/style.css?v=1.4">
+    <!-- Lucide Icons -->
+    <script src="/static/lucide.min.js"></script>
+</head>
+<body class="theme-nordic">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img src="/static/srcas_logo.png" alt="SRCAS" class="brand-logo-img">
+                <div class="brand-text">
+                    <h2>SRCAS</h2>
+                    <span>Local Attendance</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-tab="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="register">
+                    <i data-lucide="user-plus"></i>
+                    <span>Face Registration</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="kiosk">
+                    <i data-lucide="scan-face"></i>
+                    <span>Face Attendance</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="history">
+                    <i data-lucide="history"></i>
+                    <span>History & Reports</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-ic-badge">
+                    <img src="/static/ic_logo.png" alt="IIC · MoE">
+                    <span class="sidebar-ic-label">Supported by IIC · MoE</span>
+                </div>
+                <div class="connection-status">
+                    <span class="status-indicator online"></span>
+                    <span>Server Online</span>
+                </div>
+                <select id="theme-selector" class="form-control" style="width: 100%; padding: 6px; font-size: 11px; margin-top: 5px; border: none; background: transparent; color: var(--text-muted); cursor: pointer;">
+                    <option value="default">Dark</option>
+                    <option value="theme-nordic">Light</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Event Banner -->
+            <div class="event-banner">
+                <div class="event-banner-main">
+                    <!-- Left: Logos -->
+                    <div class="event-banner-logos">
+                        <img src="/image/srcas.png" alt="SRCAS" class="event-logo event-logo-large">
+                        <img src="/image/IC.png" alt="IIC" class="event-logo event-logo-small">
+                    </div>
+                    
+                    <!-- Center: Title -->
+                    <div class="event-banner-title">
+                        <h1>Boot Camp 2026</h1>
+                        <p>Innovate. Collaborate. Accelerate.</p>
+                    </div>
+                    
+                    <!-- Right: Illustration -->
+                    <div class="event-banner-illustration">
+                        <img src="/image/banner_illustration.png" alt="Illustration">
+                    </div>
+                </div>
+                
+                <!-- Bottom: Marquee -->
+                <div class="event-banner-marquee">
+                    <i data-lucide="megaphone"></i>
+                    <marquee scrollamount="6">Welcome to Boot Camp 2026! Innovate. Collaborate. Accelerate. Join us in building solutions for a smarter tomorrow. &nbsp;&bull;&nbsp; Workshops &bull; Hackathons &bull; Expert Talks &bull; Prizes &amp; More! &nbsp;&bull;&nbsp; Let's build the future together!</marquee>
+                </div>
+            </div>
+
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p id="page-subtitle" class="text-secondary">System status, logs and metrics summary</p>
+                </div>
+                <div class="header-actions">
+                    <button id="dashboard-end-s1-btn" class="btn btn-warning" style="margin-right: 10px; background: #eab308; color: #000; font-weight: 600;">
+                        <i data-lucide="clock"></i> End S1
+                    </button>
+                    <button id="dashboard-new-session-btn" class="btn btn-warning" style="margin-right: 10px;">
+                        <i data-lucide="refresh-cw"></i> Reset Today Session
+                    </button>
+                    <button id="dashboard-end-session-btn" class="btn btn-danger">
+                        <i data-lucide="power"></i> End Session
+                    </button>
+                    <div class="time-widget">
+                        <i data-lucide="clock"></i>
+                        <span id="current-time">00:00:00 PM</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="tab-content-container">
+                <!-- 1. DASHBOARD TAB -->
+                <section id="tab-dashboard" class="tab-content active">
+                    <!-- Metric cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon blue-glow">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div class="metric-details" style="flex: 1;">
+                                <span class="metric-label">Total Registered</span>
+                                <h3 id="stat-registered" class="metric-value">0</h3>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon green-glow">
+                                <i data-lucide="user-check"></i>
+                            </div>
+                            <div class="metric-details" style="flex: 1;">
+                                <span class="metric-label">Present Today</span>
+                                <h3 id="stat-present" class="metric-value">0</h3>
+                            </div>
+                            <div class="progress-ring-container">
+                                <svg width="48" height="48" class="progress-ring">
+                                    <circle stroke-width="4" fill="transparent" r="20" cx="24" cy="24" style="stroke: rgba(255,255,255,0.1);"/>
+                                    <circle id="ring-present" stroke-width="4" stroke="var(--color-success)" fill="transparent" r="20" cx="24" cy="24" style="stroke-dasharray: 125.6; stroke-dashoffset: 125.6; transition: stroke-dashoffset 1s ease-in-out;" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon blue-glow">
+                                <i data-lucide="map-pin"></i>
+                            </div>
+                            <div class="metric-details" style="flex: 1;">
+                                <span class="metric-label">Currently On Campus</span>
+                                <h3 id="campus-count" class="metric-value">0</h3>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon red-glow">
+                                <i data-lucide="user-x"></i>
+                            </div>
+                            <div class="metric-details" style="flex: 1;">
+                                <span class="metric-label">Absent Today</span>
+                                <h3 id="stat-absent" class="metric-value">0</h3>
+                            </div>
+                            <div class="progress-ring-container">
+                                <svg width="48" height="48" class="progress-ring">
+                                    <circle stroke-width="4" fill="transparent" r="20" cx="24" cy="24" style="stroke: rgba(255,255,255,0.1);"/>
+                                    <circle id="ring-absent" stroke-width="4" stroke="var(--color-danger)" fill="transparent" r="20" cx="24" cy="24" style="stroke-dasharray: 125.6; stroke-dashoffset: 125.6; transition: stroke-dashoffset 1s ease-in-out;" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon purple-glow">
+                                <i data-lucide="percent"></i>
+                            </div>
+                            <div class="metric-details" style="flex: 1;">
+                                <span class="metric-label">Attendance Rate</span>
+                                <h3 id="stat-rate" class="metric-value">0%</h3>
+                            </div>
+                            <div class="progress-ring-container">
+                                <svg width="48" height="48" class="progress-ring">
+                                    <circle stroke-width="4" fill="transparent" r="20" cx="24" cy="24" style="stroke: rgba(255,255,255,0.1);"/>
+                                    <circle id="ring-rate" stroke-width="4" stroke="var(--color-primary)" fill="transparent" r="20" cx="24" cy="24" style="stroke-dasharray: 125.6; stroke-dashoffset: 125.6; transition: stroke-dashoffset 1s ease-in-out;" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Campus & Health -->
+                    <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 24px;">
+                        <!-- Live Campus Roster -->
+                        <div class="dashboard-card live-feed-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="map-pin" class="text-primary"></i>
+                                    <h3>Currently On Campus</h3>
+                                </div>
+                                <span class="badge badge-pulse" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: rgba(34, 197, 94, 0.4);">Live</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="logs-timeline" id="campus-roster">
+                                    <div class="no-logs">Campus is empty.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Health -->
+                        <div class="dashboard-card system-health-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="server" class="text-primary"></i>
+                                    <h3>System Health</h3>
+                                </div>
+                                <span class="badge" id="system-status-badge" style="background: rgba(37, 99, 235, 0.2); color: #60a5fa;">Online</span>
+                            </div>
+                            <div class="card-body" style="display: flex; flex-direction: column; gap: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i data-lucide="video" class="text-secondary"></i>
+                                        <span>Kiosk Camera</span>
+                                    </div>
+                                    <span style="color: var(--color-success); font-weight: 600;">Ready</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i data-lucide="snowflake" class="text-secondary"></i>
+                                        <span>Users in Cooldown</span>
+                                    </div>
+                                    <span id="health-cooldown" style="color: var(--color-warning); font-weight: 600;">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i data-lucide="database" class="text-secondary"></i>
+                                        <span>Database Connection</span>
+                                    </div>
+                                    <span style="color: var(--color-success); font-weight: 600;">Secure</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Import Students CSV -->
+                        <div class="dashboard-card csv-loader-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="file-spreadsheet" class="text-primary"></i>
+                                    <h3>Import Students CSV</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 15px; font-size: 13px; line-height: 1.4;">Drag and drop a CSV file containing Student Info (Reg No, Name, Dept, Phone, Email).</p>
+                                <div id="csv-drop-zone" style="position: relative; overflow: hidden; border: 2px dashed var(--border-color); border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: rgba(0,0,0,0.15);">
+                                    <i data-lucide="upload-cloud" style="width: 32px; height: 32px; color: var(--color-primary); margin-bottom: 10px;"></i>
+                                    <p style="margin: 0; font-weight: 500; font-size: 13px;">Click or Drag & Drop CSV Here</p>
+                                    <input type="file" id="csv-file-input" accept=".csv" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                                </div>
+                                <div id="csv-upload-status" style="margin-top: 15px; font-size: 13px; text-align: center; display: none;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Recent Activity (Full Width Bottom) -->
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card live-feed-card" style="grid-column: 1 / -1;">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="activity" class="text-primary"></i>
+                                    <h3>Recent Activity</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="logs-timeline" id="live-logs" style="max-height: 800px;">
+                                    <div class="no-logs">No scans recorded today yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. REGISTRATION TAB -->
+                <section id="tab-register" class="tab-content">
+                    <div class="registration-layout">
+                        <div class="dashboard-card form-column">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="user-plus" class="text-primary"></i>
+                                    <h3>Student Information</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="register-form">
+                                    <div class="form-group">
+                                        <label for="reg-no">Registration Number</label>
+                                        <input type="text" id="reg-no" placeholder="Enter unique Reg No (e.g. FY-2026-001)" required autocomplete="off">
+                                        <span class="input-helper">Please use uppercase letters, numbers, and dashes.</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-name">Name</label>
+                                        <input type="text" id="reg-name" placeholder="Full Name" autocomplete="off">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-dept">Department</label>
+                                        <input type="text" id="reg-dept" placeholder="Department (e.g. CS, IT)" autocomplete="off">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-phone">Phone Number</label>
+                                        <input type="text" id="reg-phone" placeholder="Phone Number" autocomplete="off">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-shift">Shift</label>
+                                        <select id="reg-shift" class="form-control">
+                                            <option value="Shift 1">Shift 1</option>
+                                            <option value="Shift 2">Shift 2</option>
+                                        </select>
+                                    </div>
+                                    <div id="reg-status-alert" class="feedback-panel" style="display: none; margin-bottom: 15px;"></div>
+                                    <div class="instructions-box">
+                                        <h4>Face Auto-Capture Instructions</h4>
+                                        <ol>
+                                            <li>Look directly at the camera.</li>
+                                            <li>Position face inside camera guide.</li>
+                                            <li>Ensure your face is well-lit and not covered by hats or sunglasses.</li>
+                                            <li>Click <b>Start Capture Flow</b>.</li>
+                                            <li>Hold steady for 6 seconds. The system will automatically select the best frames to extract embeddings.</li>
+                                        </ol>
+                                    </div>
+                                    <button type="button" id="start-capture-btn" class="btn btn-primary btn-block" disabled>
+                                        <i data-lucide="camera"></i>
+                                        <span>Start Capture Flow</span>
+                                    </button>
+                                    <button type="button" id="reset-register-btn" class="btn btn-secondary btn-block mt-10">
+                                        <span>Clear & Reset</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card camera-column">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="video" class="text-primary"></i>
+                                    <h3>Camera Feed</h3>
+                                </div>
+                                <span class="badge" id="camera-status-badge">Disconnected</span>
+                            </div>
+                            <div class="card-body camera-body">
+                                <div class="video-container">
+                                    <video id="registration-video" autoplay playsinline muted></video>
+                                    <canvas id="registration-canvas" class="hidden-canvas"></canvas>
+                                    <div class="countdown-overlay" id="countdown-overlay">
+                                        <div class="countdown-circle">
+                                            <span id="countdown-number">6</span>
+                                        </div>
+                                    </div>
+                                    <div class="camera-fallback" id="camera-fallback-msg">
+                                        <i data-lucide="video-off"></i>
+                                        <p>Camera feed disabled. Check permissions.</p>
+                                        <button type="button" class="btn btn-sm btn-primary mt-10" onclick="startRegistrationCamera()">Retry Camera</button>
+                                    </div>
+                                </div>
+                                <div class="progress-bar-container" id="reg-progress-container">
+                                    <div class="progress-bar-label">
+                                        <span>Capturing best face frames...</span>
+                                        <span id="progress-percent">0%</span>
+                                    </div>
+                                    <div class="progress-bar-track">
+                                        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                                    </div>
+                                </div>
+                                <div id="registration-feedback" class="feedback-panel"></div>
+                                <div class="captured-frames-view mt-15" id="captured-frames-view">
+                                    <h4 class="text-secondary mb-10">Captured Frames Preview</h4>
+                                    <div class="frames-grid" id="frames-preview-grid">
+                                        <!-- Thumbnails of captured frames will go here -->
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. KIOSK (FACE ATTENDANCE) TAB -->
+                <section id="tab-kiosk" class="tab-content">
+                    <div class="kiosk-layout">
+                        <div class="dashboard-card kiosk-camera-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="scan" class="text-primary"></i>
+                                    <h3>Face Recognition Scanner</h3>
+                                </div>
+                                <div class="kiosk-controls">
+                                    <div class="mode-selector-group">
+                                        <button id="mode-checkin-btn" class="mode-btn active" data-mode="check_in">
+                                            <i data-lucide="log-in" style="width: 14px; height: 14px;"></i>
+                                            <span>Check-In</span>
+                                        </button>
+                                        <button id="mode-checkout-btn" class="mode-btn" data-mode="check_out">
+                                            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                                            <span>Check-Out</span>
+                                        </button>
+                                    </div>
+                                    <label class="confidence-toggle" for="confidence-60-toggle">
+                                        <input type="checkbox" id="confidence-60-toggle">
+                                        <span>Require 60%+ confidence</span>
+                                    </label>
+                                    <button id="toggle-kiosk-btn" class="btn btn-sm btn-success">
+                                        <i data-lucide="play"></i>
+                                        <span>Start Scanning</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body camera-body">
+                                <div class="video-container kiosk-video-container">
+                                    <video id="kiosk-video" autoplay playsinline muted></video>
+                                    <canvas id="kiosk-canvas" class="hidden-canvas"></canvas>
+                                    <div class="kiosk-scan-overlay" id="kiosk-scan-overlay">
+                                        <div class="scan-reticle"></div>
+                                    </div>
+                                    <div class="camera-fallback" id="kiosk-fallback-msg">
+                                        <i data-lucide="video-off"></i>
+                                        <p>Camera feed disabled. Check permissions.</p>
+                                        <button type="button" class="btn btn-sm btn-primary mt-10" onclick="startKioskCamera()">Retry Camera</button>
+                                    </div>
+                                </div>
+                                <div class="kiosk-status-strip" id="kiosk-status-strip">
+                                    <span>Kiosk Idle</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card kiosk-results-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="sparkles" class="text-primary"></i>
+                                    <h3>Last Recognized Scan</h3>
+                                </div>
+                            </div>
+                            <div class="card-body kiosk-results-body">
+                                <div class="result-display-panel idle" id="kiosk-result-panel">
+                                    <div class="result-avatar" id="result-avatar-box">
+                                        <i data-lucide="user" id="result-icon-placeholder"></i>
+                                        <canvas id="result-cropped-face" class="cropped-face-canvas"></canvas>
+                                    </div>
+                                    <h2 id="result-reg-no">Waiting...</h2>
+                                    <p id="result-status-text" class="status-label">No face scanned yet</p>
+                                    <div class="result-details" id="result-details-box">
+                                        <div class="detail-row">
+                                            <span>Name</span>
+                                            <strong id="result-name">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Reg No</span>
+                                            <strong id="result-reg-no-detail">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Department</span>
+                                            <strong id="result-dept">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Shift</span>
+                                            <strong id="result-shift">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Time</span>
+                                            <strong id="result-time">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Match Confidence</span>
+                                            <strong id="result-confidence">-</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. HISTORY & REPORTS TAB -->
+                <section id="tab-history" class="tab-content">
+                    <div class="dashboard-card history-card">
+                        <div class="card-header history-header">
+                            <div class="card-header-title">
+                                <i data-lucide="database" class="text-primary"></i>
+                                <h3>Attendance Log History</h3>
+                            </div>
+                            <div class="history-actions">
+                                <div class="view-selector-group mode-selector-group">
+                                    <button id="view-log-btn" class="mode-btn active">Log View</button>
+                                    <button id="view-report-btn" class="mode-btn">Report View</button>
+                                </div>
+                                <div class="date-selector">
+                                    <label for="history-date">Date:</label>
+                                    <input type="date" id="history-date">
+                                </div>
+                                <div class="filter-selector">
+                                    <label for="history-filter">Filter:</label>
+                                    <select id="history-filter" class="form-control">
+                                        <option value="all">All</option>
+                                        <option value="present">Present</option>
+                                        <option value="absent">Absent</option>
+                                    </select>
+                                </div>
+                                <button id="export-pdf-btn" class="btn btn-primary">
+                                    <i data-lucide="file-text"></i>
+                                    <span>Export PDF</span>
+                                </button>
+                                <button id="export-excel-btn" class="btn btn-success" style="margin-left: 8px; background: #16a34a; color: white; border: none;">
+                                    <i data-lucide="file-spreadsheet"></i>
+                                    <span>Export Excel</span>
+                                </button>
+                            </div>
+                        </div>
+                            <div class="table-container">
+                                <table class="data-table" id="history-table">
+                                    <thead id="history-table-head">
+                                        <!-- Dynamically generated by JS -->
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <tr>
+                                            <td colspan="10" class="text-center text-secondary">Loading records...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Password Modal for Authorization -->
+    <div id="password-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content dashboard-card" style="width: 400px; padding: 20px;">
+            <h3 id="modal-title" style="margin-bottom: 15px; color: var(--color-danger);">Authorization Required</h3>
+            <p id="modal-desc" style="margin-bottom: 20px;" class="text-secondary">Please enter the admin password.</p>
+            <input type="password" id="session-password-input" class="form-control" placeholder="Password" style="margin-bottom: 20px; width: 100%;">
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancel-session-btn" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-session-btn" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Missed Session -->
+    <div id="missed-session-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content dashboard-card" style="width: 400px; padding: 20px; border: 1px solid var(--color-warning); box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(234, 179, 8, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-lucide="alert-triangle" style="color: var(--color-warning); width: 24px; height: 24px;"></i>
+                </div>
+                <h3 style="color: var(--color-warning); margin: 0;">Attention Required</h3>
+            </div>
+            <p id="missed-session-msg" style="margin-bottom: 20px; line-height: 1.5;" class="text-secondary"></p>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancel-missed-session" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-missed-session" class="btn btn-warning">Confirm Check-In</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main JavaScript Application -->
+    <script src="/static/app.js?v=2.1"></script>
+</body>
+</html>

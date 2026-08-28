@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRCAS Root Admin</title>
+    <link rel="stylesheet" href="/static/fonts/inter.css">
+    <link rel="stylesheet" href="/static/style.css?v=1.4">
+    <script src="/static/lucide.min.js"></script>
+    <style>
+        .hidden { display: none !important; }
+        .login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--color-bg);
+        }
+        .login-panel {
+            background: var(--color-card);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--color-gray-800);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+        .login-panel h2 {
+            margin: 16px 0 32px 0;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .admin-form-row {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+        .admin-form-row > input,
+        .admin-form-row > select {
+            flex: 1;
+            min-width: 140px;
+        }
+        /* Make sure cards fill height nicely */
+        .admin-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .admin-card .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .admin-card form {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body class="theme-nordic">
+    <div id="toast-container" class="toast-container"></div>
+    
+    <!-- Login Screen -->
+    <div class="login-wrapper" id="login-view">
+        <div class="login-panel">
+            <div style="margin: 0 auto 16px auto; width: 64px; height: 64px; display: flex; justify-content: center; align-items: center;">
+                <img src="/static/srcas_logo.png" alt="SRCAS" style="width: 56px; height: 56px; object-fit: contain;">
+            </div>
+            <h2>Root Authorization</h2>
+            <form id="login-form">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <input type="password" id="admin-password" class="form-control" placeholder="Enter root passphrase" required style="text-align: center;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i data-lucide="unlock"></i> <span>Authenticate</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div class="app-container hidden" id="dashboard-view">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img src="/static/srcas_logo.png" alt="SRCAS" class="brand-logo-img">
+                <div class="brand-text">
+                    <h2>SRCAS</h2>
+                    <span>Root Admin</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active">
+                    <i data-lucide="terminal-square"></i>
+                    <span>Admin Tools</span>
+                </a>
+                <a href="/" class="menu-item">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Back to App</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-danger" style="width: 100%;">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="top-header">
+                <div class="header-title">
+                    <h1>Admin Dashboard</h1>
+                    <p class="text-secondary">Root privileges and system overrides</p>
+                </div>
+                <div class="header-actions">
+                    <div class="time-widget" style="background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.2); color: var(--color-primary);">
+                        <i data-lucide="shield"></i>
+                        <span>Root Session Active</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="tab-content-container">
+                <section class="tab-content active">
+                    <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+                        
+                        <div class="dashboard-card form-column admin-card" style="grid-column: 1 / -1;">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <div class="metric-icon blue-glow" style="width: 32px; height: 32px;"><i data-lucide="camera" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Private Face Registration</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 20px;">Securely register a new user face into the system. The camera feed is disabled by default.</p>
+                                <label class="confidence-toggle admin-confidence-toggle" for="admin-confidence-60-toggle">
+                                    <input type="checkbox" id="admin-confidence-60-toggle">
+                                    <span>Require 60%+ confidence for face attendance</span>
+                                </label>
+                                
+                                <form id="admin-register-form">
+                                    <div class="form-group admin-form-row" style="margin-bottom: 12px;">
+                                        <input type="text" id="admin-reg-no" class="form-control" placeholder="Registration No (e.g. FY-2026-001)" required>
+                                        <button type="submit" class="btn btn-primary" id="btn-start-reg"><i data-lucide="video"></i> Start Camera</button>
+                                    </div>
+                                </form>
+
+                                <div id="admin-camera-container" class="hidden" style="margin-top: 20px; text-align: center; position: relative;">
+                                    <video id="admin-video" autoplay playsinline muted style="width: 100%; max-width: 400px; border-radius: 10px; border: 2px solid var(--color-primary);"></video>
+                                    <canvas id="admin-canvas" style="display: none;"></canvas>
+                                    
+                                    <div id="admin-countdown-overlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: 10px;">
+                                        <span id="admin-countdown-number" style="font-size: 80px; color: white; font-weight: bold; text-shadow: 0 4px 10px rgba(0,0,0,0.8);">6</span>
+                                    </div>
+
+                                    <div id="admin-progress-container" style="display: none; margin-top: 15px; width: 100%; max-width: 400px; margin-inline: auto;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; color: var(--text-secondary);">
+                                            <span>Capturing Faces...</span>
+                                            <span id="admin-progress-text">0%</span>
+                                        </div>
+                                        <div style="height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden;">
+                                            <div id="admin-progress-bar" style="height: 100%; width: 0%; background: var(--color-primary); transition: width 0.3s ease;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card form-column admin-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <div class="metric-icon blue-glow" style="width: 32px; height: 32px;"><i data-lucide="clock" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Force Attendance Log</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 20px;">Bypass camera detection and manually force a check-in or check-out event.</p>
+                                <form id="manual-log-form">
+                                    <div class="form-group admin-form-row">
+                                        <input type="text" id="manual-reg" class="form-control" placeholder="Registration No" required>
+                                        <select id="manual-mode" class="form-control" style="flex: 0.8;">
+                                            <option value="check_in">Check In</option>
+                                            <option value="check_out">Check Out</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-success"><i data-lucide="play"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card form-column admin-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <div class="metric-icon purple-glow" style="width: 32px; height: 32px;"><i data-lucide="file-edit" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Modify Timestamp</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 20px;">Overwrite the exact HH:MM:SS timestamps for an existing log.</p>
+                                <form id="edit-log-form">
+                                    <div class="form-group admin-form-row" style="margin-bottom: 12px;">
+                                        <input type="text" id="edit-reg" class="form-control" placeholder="Reg No" required>
+                                        <input type="date" id="edit-date" class="form-control" required>
+                                    </div>
+                                    <div class="form-group admin-form-row">
+                                        <input type="time" id="edit-in" class="form-control" placeholder="IN (HH:MM:SS)" step="1">
+                                        <input type="time" id="edit-out" class="form-control" placeholder="OUT (HH:MM:SS)" step="1">
+                                        <button type="submit" class="btn btn-warning"><i data-lucide="save"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card form-column admin-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <div class="metric-icon green-glow" style="width: 32px; height: 32px;"><i data-lucide="unlock-keyhole" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Release Cooldown</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 20px;">Bypass the 1.5-minute anti-spam cooldown lock for a specific user.</p>
+                                <form id="cooldown-form">
+                                    <div class="form-group admin-form-row">
+                                        <input type="text" id="cooldown-reg" class="form-control" placeholder="Reg No (or type 'ALL')" required>
+                                        <button type="submit" class="btn btn-primary"><i data-lucide="zap"></i> Release</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card form-column admin-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <div class="metric-icon red-glow" style="width: 32px; height: 32px;"><i data-lucide="power-off" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Session Ended</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 20px;">Mark all users who haven't checked out today as Absent (MISSED).</p>
+                                <form id="end-session-form">
+                                    <div class="form-group admin-form-row">
+                                        <button type="submit" class="btn btn-danger" style="width: 100%;"><i data-lucide="power"></i> End Session</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card form-column admin-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <div class="metric-icon red-glow" style="width: 32px; height: 32px;"><i data-lucide="trash-2" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Erase Identity</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 20px;">Permanently delete a user, wiping their face embeddings and all history.</p>
+                                <form id="remove-user-form">
+                                    <div class="form-group admin-form-row">
+                                        <input type="text" id="remove-reg" class="form-control" placeholder="Registration No" required>
+                                        <button type="submit" class="btn btn-danger"><i data-lucide="user-x"></i> Purge</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Active User Cooldowns Card -->
+                        <div class="dashboard-card form-column admin-card" style="grid-column: 1 / -1; margin-top: 10px;">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div class="card-header-title">
+                                    <div class="metric-icon red-glow" style="width: 32px; height: 32px;"><i data-lucide="snowflake" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Active User Cooldowns</h3>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <span id="cooldown-summary-badge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger); font-size: 13px; padding: 6px 12px; border-radius: 20px; font-weight: 600;">0 Active</span>
+                                    <button id="clear-all-cooldowns-btn" class="btn btn-danger btn-sm"><i data-lucide="shield-alert"></i> Clear All Cooldowns</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 15px;">Monitor students currently locked in anti-spam cooldown across all kiosks and selectively or globally release locks.</p>
+                                
+                                <div style="display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;">
+                                    <input type="text" id="cooldown-search-input" class="form-control" placeholder="Search by reg no, name..." style="flex: 2; min-width: 200px;">
+                                    <button id="refresh-cooldown-list-btn" class="btn btn-secondary btn-sm"><i data-lucide="refresh-cw"></i> Refresh</button>
+                                </div>
+
+                                <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--color-gray-800); border-radius: 8px;">
+                                    <table class="table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                                        <thead style="position: sticky; top: 0; background: var(--color-card); border-bottom: 1px solid var(--color-gray-800); z-index: 2;">
+                                            <tr>
+                                                <th style="padding: 10px 14px;">Reg No</th>
+                                                <th style="padding: 10px 14px;">Name</th>
+                                                <th style="padding: 10px 14px;">Department</th>
+                                                <th style="padding: 10px 14px;">Cooldown Remaining</th>
+                                                <th style="padding: 10px 14px; text-align: center;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cooldown-tbody">
+                                            <tr>
+                                                <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-secondary);">No active cooldowns found.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Face Embeddings Registry Card -->
+                        <div class="dashboard-card form-column admin-card" style="grid-column: 1 / -1; margin-top: 10px;">
+                            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="card-header-title">
+                                    <div class="metric-icon blue-glow" style="width: 32px; height: 32px;"><i data-lucide="scan-face" style="width: 16px;"></i></div>
+                                    <h3 style="margin: 0;">Face Embeddings Registry</h3>
+                                </div>
+                                <span id="face-embeddings-summary-badge" class="badge" style="background: rgba(37, 99, 235, 0.15); color: var(--color-primary); font-size: 13px; padding: 6px 12px; border-radius: 20px; font-weight: 600;">Loading...</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-secondary" style="margin-bottom: 15px;">Verify which students have enrolled face embeddings and identify students missing face data for attendance recognition.</p>
+                                
+                                <div style="display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;">
+                                    <input type="text" id="face-search-input" class="form-control" placeholder="Search by name, reg no, dept..." style="flex: 2; min-width: 200px;">
+                                    <select id="face-filter-select" class="form-control" style="flex: 1; min-width: 150px;">
+                                        <option value="all">All Students</option>
+                                        <option value="registered">Registered Faces Only</option>
+                                        <option value="missing">Missing Face Data Only</option>
+                                    </select>
+                                    <button id="refresh-face-list-btn" class="btn btn-secondary btn-sm"><i data-lucide="refresh-cw"></i> Refresh</button>
+                                </div>
+
+                                <div style="max-height: 350px; overflow-y: auto; border: 1px solid var(--color-gray-800); border-radius: 8px;">
+                                    <table class="table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                                        <thead style="position: sticky; top: 0; background: var(--color-card); border-bottom: 1px solid var(--color-gray-800); z-index: 2;">
+                                            <tr>
+                                                <th style="padding: 10px 14px;">Reg No</th>
+                                                <th style="padding: 10px 14px;">Name</th>
+                                                <th style="padding: 10px 14px;">Department</th>
+                                                <th style="padding: 10px 14px;">Shift</th>
+                                                <th style="padding: 10px 14px; text-align: center;">Face Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="face-embeddings-tbody">
+                                            <tr>
+                                                <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-secondary);">Loading student registry...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/admin.js?v=1.1"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

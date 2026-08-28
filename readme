@@ -1,0 +1,24 @@
+local attendance  system
+
+ - local db - exportable pdfs
+
+ - barcode scanner using multiple phone cam(web) - pull out reg_no
+
+ - First Year reg_no entry - face regnition --> Storing face embeddings (vector values) | Auto-capture from video
+   ```Enter Reg No
+          │
+          ▼
+   Look at Camera (5–8 sec)
+          │
+          ▼
+   Auto Capture Best Frames
+          │
+          ▼
+   Generate Embeddings
+          │
+          ▼
+        Save```
+        
+DB - Register_no | Date | Check_In_Time | Check_Out_Time
+
+Need api endpoints for every single components

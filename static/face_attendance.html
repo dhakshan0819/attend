@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System</title>
+    <link rel="stylesheet" href="/static/fonts/inter.css">
+    <link rel="stylesheet" href="/static/style.css?v=1.4">
+    <script src="/static/theme.js"></script>
+    <!-- Lucide Icons -->
+    <script src="/static/lucide.min.js"></script>
+</head>
+
+<body class="theme-nordic">
+    <div class="app-container fullscreen-mode">
+        <!-- Sidebar Navigation -->
+
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Event Banner -->
+            <div class="event-banner">
+                <div class="event-banner-main">
+                    <!-- Left: Logos -->
+                    <div class="event-banner-logos">
+                        <img src="/image/srcas.png" alt="SRCAS" class="event-logo event-logo-large">
+                        <img src="/image/IC.png" alt="IIC" class="event-logo event-logo-small">
+                    </div>
+
+                    <!-- Center: Title -->
+                    <div class="event-banner-title">
+                        <h1>Boot Camp 2026</h1>
+                        <p>Innovate. Collaborate. Accelerate.</p>
+                    </div>
+
+                    <!-- Right: Illustration -->
+                    <div class="event-banner-illustration">
+                        <img src="/image/banner_illustration.png" alt="Illustration">
+                    </div>
+                </div>
+
+                <!-- Bottom: Marquee -->
+                <div class="event-banner-marquee">
+                    <i data-lucide="megaphone"></i>
+                    <marquee scrollamount="6">Welcome to Boot Camp 2026! Innovate. Collaborate. Accelerate. Join us in
+                        building solutions for a smarter tomorrow. &nbsp;&bull;&nbsp; Workshops &bull; Hackathons &bull;
+                        Expert Talks &bull; Prizes &amp; More! &nbsp;&bull;&nbsp; Let's build the future together!
+                    </marquee>
+                </div>
+            </div>
+
+            <!-- Kiosk Branding Header -->
+            <header class="kiosk-header">
+                <div class="kiosk-logo-group">
+                    <img src="/static/srcas_logo.png" alt="SRCAS Logo" class="kiosk-logo-srcas">
+                    <div class="kiosk-logo-divider"></div>
+                    <img src="/static/ic_logo.png" alt="IIC · MoE Logo" class="kiosk-logo-ic">
+                </div>
+                <div class="kiosk-header-title">
+                    <h2>SRCAS Smart Attendance Portal</h2>
+                    <span>Institution's Innovation Council (IIC) &middot; Ministry of Education</span>
+                </div>
+                <div class="kiosk-header-spacer"></div>
+            </header>
+
+            <div class="tab-content-container">
+                <!-- 1. DASHBOARD TAB -->
+
+
+                <!-- 2. REGISTRATION TAB -->
+
+
+                <!-- 3. KIOSK (FACE ATTENDANCE) TAB -->
+                <section id="tab-kiosk" class="tab-content active">
+                    <div class="kiosk-layout">
+                        <div class="dashboard-card kiosk-camera-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="scan" class="text-primary"></i>
+                                    <h3>Face Recognition Scanner</h3>
+                                </div>
+                                <div class="kiosk-controls">
+                                    <div class="mode-selector-group">
+                                        <button id="mode-checkin-btn" class="mode-btn active" data-mode="check_in">
+                                            <i data-lucide="log-in" style="width: 14px; height: 14px;"></i>
+                                            <span>Check-In</span>
+                                        </button>
+                                        <button id="mode-checkout-btn" class="mode-btn" data-mode="check_out">
+                                            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                                            <span>Check-Out</span>
+                                        </button>
+                                    </div>
+                                    <label class="confidence-toggle" for="confidence-60-toggle">
+                                        <input type="checkbox" id="confidence-60-toggle">
+                                        <span>Require 60%+ confidence</span>
+                                    </label>
+                                    <button id="toggle-kiosk-btn" class="btn btn-sm btn-success">
+                                        <i data-lucide="play"></i>
+                                        <span>Start Scanning</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body camera-body">
+                                <div class="video-container kiosk-video-container">
+                                    <video id="kiosk-video" autoplay playsinline muted></video>
+                                    <canvas id="kiosk-canvas" class="hidden-canvas"></canvas>
+                                    <div class="kiosk-scan-overlay" id="kiosk-scan-overlay">
+                                        <div class="scan-reticle"></div>
+                                    </div>
+                                    <div class="camera-fallback" id="kiosk-fallback-msg">
+                                        <i data-lucide="video-off"></i>
+                                        <p>Camera feed disabled. Check permissions.</p>
+                                        <button type="button" class="btn btn-sm btn-primary mt-10"
+                                            onclick="startKioskCamera()">Retry Camera</button>
+                                    </div>
+                                </div>
+                                <div class="kiosk-status-strip" id="kiosk-status-strip">
+                                    <span>Kiosk Idle - look directly at camera</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card kiosk-results-card">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="sparkles" class="text-primary"></i>
+                                    <h3>Last Recognized Scan</h3>
+                                </div>
+                            </div>
+                            <div class="card-body kiosk-results-body">
+                                <div class="result-display-panel idle" id="kiosk-result-panel">
+                                    <div class="result-avatar" id="result-avatar-box">
+                                        <i data-lucide="user" id="result-icon-placeholder"></i>
+                                        <canvas id="result-cropped-face" class="cropped-face-canvas"></canvas>
+                                    </div>
+                                    <h2 id="result-reg-no">Waiting...</h2>
+                                    <p id="result-status-text" class="status-label">No face scanned yet</p>
+                                    <div class="result-details" id="result-details-box">
+                                        <div class="detail-row">
+                                            <span>Name</span>
+                                            <strong id="result-name">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Reg No</span>
+                                            <strong id="result-reg-no-detail">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Department</span>
+                                            <strong id="result-dept">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Time</span>
+                                            <strong id="result-time">-</strong>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Match Confidence</span>
+                                            <strong id="result-confidence">-</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. HISTORY & REPORTS TAB -->
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Password Modal for End Session -->
+    <div id="password-modal" class="modal-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content dashboard-card" style="width: 400px; padding: 20px;">
+            <h3 style="margin-bottom: 15px; color: var(--color-danger);">End Session Authorization</h3>
+            <p style="margin-bottom: 20px;" class="text-secondary">Please enter the admin password to end the current
+                session. All incomplete check-ins will be marked as absent.</p>
+            <input type="password" id="end-session-password-input" class="form-control" placeholder="Password"
+                style="margin-bottom: 20px; width: 100%;">
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancel-end-session" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-end-session" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Missed Session -->
+    <div id="missed-session-modal" class="modal-overlay"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content dashboard-card"
+            style="width: 400px; padding: 20px; border: 1px solid var(--color-warning); box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <div
+                    style="width: 40px; height: 40px; border-radius: 50%; background: rgba(234, 179, 8, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i data-lucide="alert-triangle" style="color: var(--color-warning); width: 24px; height: 24px;"></i>
+                </div>
+                <h3 style="color: var(--color-warning); margin: 0;">Attention Required</h3>
+            </div>
+            <p id="missed-session-msg" style="margin-bottom: 20px; line-height: 1.5;" class="text-secondary"></p>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancel-missed-session" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-missed-session" class="btn btn-warning">Confirm Check-In</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main JavaScript Application -->
+    <script src="/static/app.js?v=2.1"></script>
+</body>
+
+</html>

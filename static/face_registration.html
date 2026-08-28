@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System</title>
+    <link rel="stylesheet" href="/static/fonts/inter.css">
+    <link rel="stylesheet" href="/static/style.css?v=1.4">
+    <script src="/static/theme.js"></script>
+    <!-- Lucide Icons -->
+    <script src="/static/lucide.min.js"></script>
+</head>
+<body class="theme-nordic">
+    <div class="app-container fullscreen-mode">
+        <!-- Sidebar Navigation -->
+        
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Kiosk Branding Header -->
+            <header class="kiosk-header">
+                <div class="kiosk-logo-group">
+                    <img src="/static/srcas_logo.png" alt="SRCAS Logo" class="kiosk-logo-srcas">
+                    <div class="kiosk-logo-divider"></div>
+                    <img src="/static/ic_logo.png" alt="IIC · MoE Logo" class="kiosk-logo-ic">
+                </div>
+                <div class="kiosk-header-title">
+                    <h2>SRCAS Smart Attendance Portal</h2>
+                    <span>Institution's Innovation Council (IIC) &middot; Ministry of Education</span>
+                </div>
+                <div class="kiosk-header-spacer"></div>
+            </header>
+
+            <div class="tab-content-container">
+                <!-- 1. DASHBOARD TAB -->
+                
+
+                <!-- 2. REGISTRATION TAB -->
+                <section id="tab-register" class="tab-content active">
+                    <div class="registration-layout">
+                        <div class="dashboard-card form-column">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="user-plus" class="text-primary"></i>
+                                    <h3>Student Information</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form id="register-form">
+                                    <div class="form-group">
+                                        <label for="reg-no">Registration Number</label>
+                                        <input type="text" id="reg-no" placeholder="Enter unique Reg No (e.g. FY-2026-001)" required autocomplete="off">
+                                        <span class="input-helper">Please use uppercase letters, numbers, and dashes.</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-name">Name</label>
+                                        <input type="text" id="reg-name" placeholder="Full Name" autocomplete="off">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-dept">Department</label>
+                                        <input type="text" id="reg-dept" placeholder="Department (e.g. CS, IT)" autocomplete="off">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-phone">Phone Number</label>
+                                        <input type="text" id="reg-phone" placeholder="Phone Number" autocomplete="off">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-shift">Shift</label>
+                                        <select id="reg-shift" class="form-control">
+                                            <option value="Shift 1">Shift 1</option>
+                                            <option value="Shift 2">Shift 2</option>
+                                        </select>
+                                    </div>
+                                    <div id="reg-status-alert" class="feedback-panel" style="display: none; margin-bottom: 15px;"></div>
+                                    <div class="instructions-box">
+                                        <h4>Face Auto-Capture Instructions</h4>
+                                        <ol>
+                                            <li>Look directly at the camera.</li>
+                                            <li>Position face inside camera guide.</li>
+                                            <li>Ensure your face is well-lit and not covered by hats or sunglasses.</li>
+                                            <li>Click <b>Start Capture Flow</b>.</li>
+                                            <li>Hold steady for 6 seconds. The system will automatically select the best frames to extract embeddings.</li>
+                                        </ol>
+                                    </div>
+                                    <button type="button" id="start-capture-btn" class="btn btn-primary btn-block" disabled>
+                                        <i data-lucide="camera"></i>
+                                        <span>Start Capture Flow</span>
+                                    </button>
+                                    <button type="button" id="reset-register-btn" class="btn btn-secondary btn-block mt-10">
+                                        <span>Clear & Reset</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card camera-column">
+                            <div class="card-header">
+                                <div class="card-header-title">
+                                    <i data-lucide="video" class="text-primary"></i>
+                                    <h3>Camera Feed</h3>
+                                </div>
+                                <span class="badge" id="camera-status-badge">Disconnected</span>
+                            </div>
+                            <div class="card-body camera-body">
+                                <div class="video-container">
+                                    <video id="registration-video" autoplay playsinline muted></video>
+                                    <canvas id="registration-canvas" class="hidden-canvas"></canvas>
+                                    <div class="countdown-overlay" id="countdown-overlay">
+                                        <div class="countdown-circle">
+                                            <span id="countdown-number">6</span>
+                                        </div>
+                                    </div>
+                                    <div class="camera-fallback" id="camera-fallback-msg">
+                                        <i data-lucide="video-off"></i>
+                                        <p>Camera feed disabled. Check permissions.</p>
+                                        <button type="button" class="btn btn-sm btn-primary mt-10" onclick="startRegistrationCamera()">Retry Camera</button>
+                                    </div>
+                                </div>
+                                <div class="progress-bar-container" id="reg-progress-container">
+                                    <div class="progress-bar-label">
+                                        <span>Capturing best face frames...</span>
+                                        <span id="progress-percent">0%</span>
+                                    </div>
+                                    <div class="progress-bar-track">
+                                        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                                    </div>
+                                </div>
+                                <div id="registration-feedback" class="feedback-panel"></div>
+                                <div class="captured-frames-view mt-15" id="captured-frames-view">
+                                    <h4 class="text-secondary mb-10">Captured Frames Preview</h4>
+                                    <div class="frames-grid" id="frames-preview-grid">
+                                        <!-- Thumbnails of captured frames will go here -->
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                        <div class="frame-placeholder"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. KIOSK (FACE ATTENDANCE) TAB -->
+                
+
+                <!-- 4. HISTORY & REPORTS TAB -->
+                
+            </div>
+        </main>
+    </div>
+
+    <!-- Password Modal for End Session -->
+    <div id="password-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content dashboard-card" style="width: 400px; padding: 20px;">
+            <h3 style="margin-bottom: 15px; color: var(--color-danger);">End Session Authorization</h3>
+            <p style="margin-bottom: 20px;" class="text-secondary">Please enter the admin password to end the current session. All incomplete check-ins will be marked as absent.</p>
+            <input type="password" id="end-session-password-input" class="form-control" placeholder="Password" style="margin-bottom: 20px; width: 100%;">
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancel-end-session" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-end-session" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main JavaScript Application -->
+    <script src="/static/app.js?v=2.1"></script>
+</body>
+</html>
