@@ -240,6 +240,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const forceCheckoutActiveBtn = document.getElementById('dashboard-force-checkout-active-btn');
+    if (forceCheckoutActiveBtn) {
+        forceCheckoutActiveBtn.addEventListener('click', () => {
+            currentModalAction = 'force_checkout_active';
+            modalTitle.innerText = 'Force Checkout (Active) Authorization';
+            modalTitle.style.color = 'var(--color-warning)';
+            modalDesc.innerText = 'Please enter the admin password. This will force check-out all students currently checked in (already on campus) without marking absent students.';
+            modalConfirm.className = 'btn btn-warning';
+            modal.style.display = 'flex';
+            pwdInput.value = '';
+            pwdInput.focus();
+        });
+    }
+
     if (modalCancel) {
         modalCancel.addEventListener('click', () => {
             modal.style.display = 'none';
@@ -254,7 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 endpoint = '/api/admin/session/end_with_password';
             } else if (currentModalAction === 'end_s1') {
                 endpoint = '/api/admin/session/end_s1_with_password';
+            } else if (currentModalAction === 'force_checkout_active') {
+                endpoint = '/api/admin/session/force_checkout_active_with_password';
             }
+
             try {
                 const res = await fetch(endpoint, {
                     method: 'POST',

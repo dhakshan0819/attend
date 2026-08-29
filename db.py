@@ -752,6 +752,59 @@ def reset_today_session(date):
     conn.commit()
     conn.close()
 
+def force_checkout_active_students(date=None):
+    """
+    Force check-out ONLY students who are currently checked in (already in campus) for the given date.
+    Leaves absent students and already checked-out students untouched.
+    """
+    if date is None:
+        date = datetime.now().strftime("%Y-%m-%d")
+        
+    current_time = datetime.now().strftime("%H:%M:%S")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM attendance WHERE date = ?", (date,))
+    rows = cursor.fetchall()
+    
+    updated_count = 0
+    for row in rows:
+        reg_no = row["reg_no"]
+        s1_in = row["s1_in"]
+        s1_out = row["s1_out"]
+        s2_in = row["s2_in"]
+        s2_out = row["s2_out"]
+        
+        updated = False
+        if s2_in and not s2_out:
+            cursor.execute(
+                "UPDATE attendance SET s2_out = ? WHERE reg_no = ? AND date = ?",
+                (current_time, reg_no, date)
+            )
+            updated = True
+        elif s1_in and (not s1_out or s1_out == 'SKIPPED'):
+            cursor.execute(
+                "UPDATE attendance SET s1_out = ? WHERE reg_no = ? AND date = ?",
+                (current_time, reg_no, date)
+            )
+            updated = True
+
+        if updated:
+            updated_count += 1
+            cursor.execute("SELECT * FROM attendance WHERE reg_no = ? AND date = ?", (reg_no, date))
+            rec = cursor.fetchone()
+            if rec:
+                if (rec["s1_in"] and rec["s1_out"] and rec["s1_out"] != 'SKIPPED' and 
+                    rec["s2_in"] and rec["s2_out"]):
+                    cursor.execute("UPDATE attendance SET status = 'PRESENT' WHERE reg_no = ? AND date = ?", (reg_no, date))
+                else:
+                    cursor.execute("UPDATE attendance SET status = 'INCOMPLETE' WHERE reg_no = ? AND date = ?", (reg_no, date))
+
+    conn.commit()
+    conn.close()
+    return updated_count
+
+
 def import_students_csv(csv_path):
     """
     Reads a CSV file and inserts/updates the students table.

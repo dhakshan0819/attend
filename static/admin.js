@@ -163,6 +163,21 @@ document.getElementById('remove-user-form').addEventListener('submit', async (e)
     }
 });
 
+document.getElementById('force-checkout-active-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!confirm('Are you sure you want to force check-out all students who are currently checked in?')) return;
+    const res = await adminFetch('/api/admin/session/force_checkout_active', {
+        method: 'POST'
+    });
+    if (res.ok) {
+        const data = await res.json();
+        showToast(data.message || 'Force checkout complete', 'toast-success');
+    } else {
+        const data = await res.json();
+        showToast(data.detail || 'Failed to force checkout', 'toast-error');
+    }
+});
+
 document.getElementById('end-session-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!confirm('Are you sure you want to end the session? This will mark all users who have not checked out as absent.')) return;
@@ -177,6 +192,7 @@ document.getElementById('end-session-form').addEventListener('submit', async (e)
         showToast(data.detail || 'Failed to end session', 'toast-error');
     }
 });
+
 
 async function autoFillEditLog() {
     const reg_no = document.getElementById('edit-reg').value.trim().toUpperCase();

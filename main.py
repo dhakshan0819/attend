@@ -497,6 +497,29 @@ def admin_new_session_password(req: EndSessionPasswordRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/admin/session/force_checkout_active")
+def admin_force_checkout_active(_: None = Depends(verify_admin_token)):
+    try:
+        from datetime import datetime
+        today = datetime.now().strftime("%Y-%m-%d")
+        count = db.force_checkout_active_students(today)
+        return {"status": "success", "message": f"Force checked out {count} student(s) currently checked in.", "count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/admin/session/force_checkout_active_with_password")
+def admin_force_checkout_active_password(req: EndSessionPasswordRequest):
+    if req.password != "sudo@neko":
+        raise HTTPException(status_code=401, detail="Invalid password")
+    try:
+        from datetime import datetime
+        today = datetime.now().strftime("%Y-%m-%d")
+        count = db.force_checkout_active_students(today)
+        return {"status": "success", "message": f"Force checked out {count} student(s) currently checked in.", "count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/admin/attendance/edit")
 def admin_edit_log(req: EditLogRequest, _: None = Depends(verify_admin_token)):
     try:
