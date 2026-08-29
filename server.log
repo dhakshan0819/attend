@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/neko/attendance-UI/main.py", line 13, in <module>
+    from pdf_generator import generate_attendance_pdf
+  File "/home/neko/attendance-UI/pdf_generator.py", line 3, in <module>
+    from reportlab.lib.pagesizes import A4, landscape
+ModuleNotFoundError: No module named 'reportlab'
